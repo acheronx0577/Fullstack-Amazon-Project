@@ -35,16 +35,22 @@ cart.forEach((cartItem) => {
         }
     });
 
+    
+    const today = dayjs();
+    let deliveryDate;
 
-        let dateString = '';
-        if (deliveryOption) {
-            const today = dayjs();
-            const deliveryDate = today.add(
-                deliveryOption.deliveryDays,
-                'days'
-            );
-            dateString = deliveryDate.format('dddd, MMMM D');
-        }
+    if (deliveryOption) {
+    deliveryDate = today.add(
+        deliveryOption.deliveryDays,
+        'days'
+    );
+    } else {
+    deliveryDate = today; // fallback if no delivery option found
+    }
+
+    const dateString = deliveryDate.format(
+        'dddd, MMMM D'
+    );
 
     cartSummaryHTML += `
         <div class="cart-item-container 
