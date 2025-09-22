@@ -1,3 +1,6 @@
+import {cart} from '../../data/cart.js'
+import
 export function renderPaymentSummary() {
-    console.log('payment summary');
+
+
 }
