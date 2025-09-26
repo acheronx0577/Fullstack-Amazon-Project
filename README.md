@@ -2,10 +2,10 @@
 A complete Amazon-like shopping experience with real backend integration.
 
 ## 🚀 Live Demo
-**🌐 [View Live Site](https://yourusername.github.io/amazon-clone)**
+**🌐 [View Live Site](https://acheronx0577.github.io/Fullstack-Amazon-Project)**
 
 ## 📸 Preview
-![Amazon Clone](https://via.placeholder.com/800x400/232f3e/ffffff?text=Amazon+Clone+Preview)
+<img width="2493" height="1296" alt="image" src="https://github.com/user-attachments/assets/85e31878-b5ab-40a6-b281-070a45f7403a" />
 
 ## ✨ Key Features
 
