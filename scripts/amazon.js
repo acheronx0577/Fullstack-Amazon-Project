@@ -15,15 +15,17 @@ function renderProductsGrid() {
   // If a search exists in the URL parameters,
   // filter the products that match the search.
   if (search) {
-  filteredProducts = products.filter((product) => {
-    const productName = product.name.toLowerCase();
-    const searchTerm = search.toLowerCase();
-    
-    // Split search into individual words
-    const searchWords = searchTerm.split(/\s+/);
-    
-    // Check if ANY search word exists in the product name
-    return searchWords.some(word => productName.includes(word));
+    filteredProducts = products.filter((product) => {
+      let matchingKeyword = false;
+
+      product.keywords.forEach((keyword) => {
+        if (keyword.toLowerCase().includes(search.toLowerCase())) {
+          matchingKeyword = true;
+        }
+      });
+
+      return matchingKeyword ||
+        product.name.toLowerCase().includes(search.toLowerCase());
     });
   }
 
