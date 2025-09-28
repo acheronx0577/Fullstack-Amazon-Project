@@ -44,13 +44,113 @@
 
 .cart-item-container,
 .payment-summary {
-  border: 1px solid rgb(222, 222, 222);
-  border-radius: 4px;
-  padding: 18px;
+  border: 1.6px solid #e0e0e0;
+  border-radius: 12px;
+  padding: 20px;
+  background: #ffffff;
+  transition: all 0.3s ease;
+}
+
+.payment-summary:hover {
+  border-color: #c084fc;
+  animation: movingGlow 6s infinite linear;
+  transform: translateY(-2px);
+}
+
+@keyframes movingGlow {
+  0% {
+    box-shadow:
+      15px 0 30px rgba(192, 132, 252, 0.3),
+      /* Light purple */
+      -15px 0 20px rgba(248, 113, 113, 0.25),
+      /* Soft red */
+      0 0 40px rgba(110, 231, 183, 0.2);
+    /* Mint green */
+  }
+
+  33% {
+    box-shadow:
+      0 15px 30px rgba(248, 113, 113, 0.3),
+      /* Soft red */
+      0 -15px 20px rgba(110, 231, 183, 0.25),
+      /* Mint green */
+      0 0 40px rgba(192, 132, 252, 0.2);
+    /* Light purple */
+  }
+
+  66% {
+    box-shadow:
+      -15px 0 30px rgba(110, 231, 183, 0.3),
+      /* Mint green */
+      15px 0 20px rgba(192, 132, 252, 0.25),
+      /* Light purple */
+      0 0 40px rgba(248, 113, 113, 0.2);
+    /* Soft red */
+  }
+
+  100% {
+    box-shadow:
+      15px 0 30px rgba(192, 132, 252, 0.3),
+      /* Light purple */
+      -15px 0 20px rgba(248, 113, 113, 0.25),
+      /* Soft red */
+      0 0 40px rgba(110, 231, 183, 0.2);
+    /* Mint green */
+  }
 }
 
 .cart-item-container {
   margin-bottom: 12px;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.cart-item-container:hover {
+  border-color: #c084fc;
+  animation: cartGlow 6s infinite linear;
+  transform: translateY(-2px);
+}
+
+@keyframes cartGlow {
+  0% {
+    box-shadow:
+      10px 0 25px rgba(192, 132, 252, 0.25),
+      /* Light purple */
+      -10px 0 15px rgba(248, 113, 113, 0.2),
+      /* Soft red */
+      0 0 30px rgba(110, 231, 183, 0.15);
+    /* Mint green */
+  }
+
+  33% {
+    box-shadow:
+      0 10px 25px rgba(248, 113, 113, 0.25),
+      /* Soft red */
+      0 -10px 15px rgba(110, 231, 183, 0.2),
+      /* Mint green */
+      0 0 30px rgba(192, 132, 252, 0.15);
+    /* Light purple */
+  }
+
+  66% {
+    box-shadow:
+      -10px 0 25px rgba(110, 231, 183, 0.25),
+      /* Mint green */
+      10px 0 15px rgba(192, 132, 252, 0.2),
+      /* Light purple */
+      0 0 30px rgba(248, 113, 113, 0.15);
+    /* Soft red */
+  }
+
+  100% {
+    box-shadow:
+      10px 0 25px rgba(192, 132, 252, 0.25),
+      /* Light purple */
+      -10px 0 15px rgba(248, 113, 113, 0.2),
+      /* Soft red */
+      0 0 30px rgba(110, 231, 183, 0.15);
+    /* Mint green */
+  }
 }
 
 .payment-summary {
