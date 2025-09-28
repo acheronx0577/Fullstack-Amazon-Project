@@ -123,12 +123,7 @@
 }
 
 .product-quantity-container {
-  transition: all 0.3s ease-in-out;
   margin-bottom: 17px;
-}
-
-.product-quantity-container:hover {
-  transform: translateY(-2px);
 }
 
 .product-spacer {
