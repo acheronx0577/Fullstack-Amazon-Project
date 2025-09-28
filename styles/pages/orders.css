@@ -140,11 +140,28 @@
   width: 140px;
   height: 36px;
   border-radius: 8px;
-
   display: flex;
   align-items: center;
   justify-content: center;
+
+  transition: all 0.3s ease-in-out;
 }
+
+.buy-again-button:hover {
+  transform: translateY(-2px) scale(1.02);
+
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  filter: brightness(1.1);
+}
+
+/* Active/Click effect */
+.buy-again-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease;
+}
+
 
 .buy-again-icon {
   width: 25px;
@@ -157,8 +174,24 @@
 
 .track-package-button {
   width: 100%;
-  font-size: 15px;
-  padding: 8px;
+  padding: 12px;
+  transition: all 0.3s ease-in-out;
+}
+
+.track-package-button:hover {
+  transform: translateY(-2px) scale(1.02);
+
+  /* Shadow effect */
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+  filter: brightness(1);
+}
+
+/* Active/Click effect */
+.track-package-button:active {
+  transform: translateY(0) scale(0.98);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.1s ease;
 }
 
 @media (max-width: 800px) {
