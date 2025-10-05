@@ -48,3 +48,6 @@ A complete Amazon-like shopping experience with real backend integration.
 - Amazon-like UI - Familiar interface for users
 - Clean Typography - Roboto font from Google Fonts
 - Professional Icons - Custom icon set for intuitive navigation
+
+## **📌 Daily Fact:**
+_(This section will be updated automatically)_
