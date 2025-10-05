@@ -1,0 +1,36 @@
+on:
+  schedule:
+    - cron: "0 16 * * *" # Runs daily at 8am pst
+  workflow_dispatch: # Allows manual runs
+jobs:
+  update-readme:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GH_PAT }}
+
+      - name: Fetch Today's Date
+        run: echo "DATE=$(date +'%m/%d')" >> $GITHUB_ENV
+
+      - name: Fetch Daily Fact
+        run: |
+          FACT=$(curl -s "http://numbersapi.com/${{ env.DATE }}/date")
+          echo "FACT=$FACT" >> $GITHUB_ENV
+
+      - name: Update README
+        run: |
+          awk -v fact="**<b>📌 Daily Fact:</b>** $FACT" '
+          /^\*\*<b>📌 Daily Fact:<\/b>\*\*/ {print fact; found=1; next}
+          {print}
+          END {if (!found) print fact}
+          ' README.md > temp.md && mv temp.md README.md
+
+      - name: Commit and Push Changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add README.md
+          git commit -m "📅 Update daily fact for $(date +'%m/%d')" || exit 0
+          git push
