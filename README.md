@@ -12,8 +12,6 @@ A complete Amazon-like shopping experience with real backend integration.
 ```plaintext
 📌 Daily Fact: On this day in history, remarkable things happened that shaped our world. Every day is a new opportunity for learning and growth! 🌟
 ```
-**📌 Daily Fact:** On December 19, 1843, Charles Dickens' "A Christmas Carol" was first published, changing Christmas traditions forever.
-
 *✨ This fact updates automatically every day!*
 
 ## ✨ Key Features
