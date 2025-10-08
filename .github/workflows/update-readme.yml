@@ -1,52 +1,139 @@
-name: Update README with Daily Fact
+name: 📚 Update README with Daily Fact
 
 on:
   schedule:
+    # Runs daily at 4 PM UTC (8 AM PST / 11 AM EST)
     - cron: "0 16 * * *"
+  
+  # Allow manual triggering
   workflow_dispatch:
+    inputs:
+      debug:
+        description: "Enable debug output"
+        required: false
+        default: false
+        type: boolean
 
 jobs:
   update-readme:
+    name: 🗓️ Update Daily Fact
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout Repository
+      # Step 1: Checkout repository
+      - name: 🔄 Checkout Repository
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.GH_PAT }}
+          token: ${{ secrets.GH_PAT || github.token }}
+          fetch-depth: 0
 
-      - name: Fetch Today's Date
-        run: |
-          echo "DATE=$(date +'%m/%d')" >> $GITHUB_ENV
-          echo "DATE_DISPLAY=$(date +'%B %d')" >> $GITHUB_ENV
-
-      - name: Fetch Daily Fact
-        run: |
-          # Robust fact fetching with multiple fallbacks
-          set +e
-          FACT=""
-          
-          echo "Fetching fact for date: ${{ env.DATE }}"
-          
-          # Try Numbers API with timeout
-          FACT=$(curl -s --max-time 10 --retry 2 "http://numbersapi.com/${{ env.DATE }}/date")
-          
-          # Validate response
-          if [ -z "$FACT" ] || [ "$FACT" = "null" ] || [[ "$FACT" == *"does not exist"* ]]; then
-            echo "Numbers API failed, using fallback"
-            FACT="On ${{ env.DATE_DISPLAY }}, remember: every day brings new opportunities for learning and discovery!"
-          fi
-          
-          echo "Using fact: $FACT"
-          echo "FACT=$FACT" >> $GITHUB_ENV
-
-      - name: Update README
-        run: |
-          sed -i "s|**📌 Daily Fact:**.*|**📌 Daily Fact:** $FACT|" README.md
-
-      - name: Commit and Push Changes
+      # Step 2: Setup Git configuration
+      - name: ⚙️ Setup Git Identity
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global pull.rebase false
+
+      # Step 3: Get current date information
+      - name: 📅 Get Current Date
+        id: date
+        run: |
+          echo "date_slash=$(date +'%m/%d')" >> $GITHUB_OUTPUT
+          echo "date_display=$(date +'%B %d')" >> $GITHUB_OUTPUT
+          echo "iso_date=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
+          echo "weekday=$(date +'%A')" >> $GITHUB_OUTPUT
+
+      # Step 4: Fetch daily fact from API
+      - name: 🌐 Fetch Daily Fact
+        id: fact
+        run: |
+          set +e
+          echo "🎯 Fetching fact for date: ${{ steps.date.outputs.date_slash }}"
+          echo "📅 Today is ${{ steps.date.outputs.date_display }} (${{ steps.date.outputs.weekday }})"
+          
+          # Try Numbers API first
+          echo "🔍 Trying Numbers API..."
+          FACT_JSON=$(curl -s --max-time 10 --retry 2 "http://numbersapi.com/${{ steps.date.outputs.date_slash }}/date?json")
+          FACT=$(echo "$FACT_JSON" | jq -r '.text // empty' 2>/dev/null)
+          
+          # Validate the fact
+          if [ -n "$FACT" ] && [ "$FACT" != "null" ] && [[ ! "$FACT" =~ "does not exist" ]]; then
+            echo "✅ Successfully fetched from Numbers API"
+          else
+            echo "❌ Numbers API failed, trying random date fact..."
+            FACT_JSON=$(curl -s --max-time 10 "http://numbersapi.com/random/date?json")
+            FACT=$(echo "$FACT_JSON" | jq -r '.text // empty' 2>/dev/null)
+            
+            if [ -n "$FACT" ] && [ "$FACT" != "null" ]; then
+              echo "✅ Successfully fetched random date fact"
+            else
+              echo "❌ All APIs failed, using inspirational fallback"
+              FACT="On this day in history, remarkable things happened that shaped our world. Every day is a new opportunity for learning and growth! 🌟"
+            fi
+          fi
+          
+          # Clean and format the fact
+          FACT=$(echo "$FACT" | tr -d '\r' | sed 's/^"//' | sed 's/"$//')
+          echo "📖 Fact: $FACT"
+          
+          # Escape for sed and create outputs
+          ESCAPED_FACT=$(printf '%s' "$FACT" | sed 's/[\/&]/\\&/g')
+          echo "fact=$FACT" >> $GITHUB_OUTPUT
+          echo "escaped_fact=$ESCAPED_FACT" >> $GITHUB_OUTPUT
+
+      # Step 5: Update README file
+      - name: 📝 Update README
+        run: |
+          echo "🔄 Updating README.md..."
+          
+          # Create backup
+          cp README.md README.md.backup
+          
+          # Update the daily fact section
+          if sed -i "s|<!-- DAILY_FACT -->.*|<!-- DAILY_FACT -->\n**📌 Daily Fact:** ${{ steps.fact.outputs.escaped_fact }}|" README.md; then
+            echo "✅ README updated successfully"
+            
+            # Show the change
+            echo "📊 Change made:"
+            git diff README.md || true
+          else
+            echo "❌ Failed to update README, restoring backup"
+            mv README.md.backup README.md
+            exit 1
+          fi
+          
+          # Cleanup backup
+          rm README.md.backup
+
+      # Step 6: Commit and push changes
+      - name: 🚀 Commit and Push Changes
+        run: |
+          echo "📦 Staging changes..."
           git add README.md
-          git diff --staged --quiet || git commit -m "📚 Update daily fact for ${{ env.DATE }}"
-          git push
+          
+          if git diff --staged --quiet; then
+            echo "✅ No changes to commit (fact might be identical)"
+          else
+            echo "💾 Committing changes..."
+            git commit -m "📚 Update daily fact for ${{ steps.date.outputs.iso_date }}
+            
+            • Date: ${{ steps.date.outputs.date_display }}
+            • Fact: ${{ steps.fact.outputs.fact }}"
+            
+            echo "📤 Pushing to repository..."
+            git push
+            echo "🎉 Successfully updated daily fact!"
+          fi
+
+      # Step 7: Summary
+      - name: 📋 Summary
+        if: always()
+        run: |
+          echo " "
+          echo "🏁 WORKFLOW SUMMARY"
+          echo "===================="
+          echo "📅 Date: ${{ steps.date.outputs.date_display }}"
+          echo "📖 Fact: ${{ steps.fact.outputs.fact }}"
+          echo "🕒 Time: $(date -u +'%H:%M:%S UTC')"
+          echo "✅ Status: ${{ job.status }}"
+          echo " "
