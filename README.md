@@ -7,6 +7,12 @@ A complete Amazon-like shopping experience with real backend integration.
 ## 📸 Preview
 <img width="2493" height="1296" alt="image" src="https://github.com/user-attachments/assets/85e31878-b5ab-40a6-b281-070a45f7403a" />
 
+## 📌 Today's Historical Fact
+<!-- DAILY_FACT -->
+**📌 Daily Fact:** On December 19, 1843, Charles Dickens' "A Christmas Carol" was first published, changing Christmas traditions forever.
+
+*✨ This fact updates automatically every day!*
+
 ## ✨ Key Features
 
 ### 🛍️ Shopping Experience
@@ -48,9 +54,3 @@ A complete Amazon-like shopping experience with real backend integration.
 - Amazon-like UI - Familiar interface for users
 - Clean Typography - Roboto font from Google Fonts
 - Professional Icons - Custom icon set for intuitive navigation
-
-## 📌 Today's Historical Fact
-<!-- DAILY_FACT -->
-**📌 Daily Fact:** On December 19, 1843, Charles Dickens' "A Christmas Carol" was first published, changing Christmas traditions forever.
-
-*✨ This fact updates automatically every day!*
