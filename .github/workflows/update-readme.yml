@@ -2,17 +2,8 @@ name: 📚 Update README with Daily Fact
 
 on:
   schedule:
-    # Runs daily at 4 PM UTC (8 AM PST / 11 AM EST)
     - cron: "0 16 * * *"
-  
-  # Allow manual triggering
   workflow_dispatch:
-    inputs:
-      debug:
-        description: "Enable debug output"
-        required: false
-        default: false
-        type: boolean
 
 jobs:
   update-readme:
@@ -34,7 +25,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase false
 
-      # Step 3: Sync with remote before making changes
+      # Step 3: Sync with remote
       - name: 🔄 Sync with Remote
         run: |
           echo "🔄 Pulling latest changes from remote..."
@@ -50,40 +41,52 @@ jobs:
           echo "iso_date=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
           echo "weekday=$(date +'%A')" >> $GITHUB_OUTPUT
 
-      # Step 5: Fetch daily fact from API
+      # Step 5: Fetch daily fact from API (FIXED)
       - name: 🌐 Fetch Daily Fact
         id: fact
         run: |
           set +e
           echo "🎯 Fetching fact for date: ${{ steps.date.outputs.date_slash }}"
-          echo "📅 Today is ${{ steps.date.outputs.date_display }} (${{ steps.date.outputs.weekday }})"
           
-          # Try Numbers API first
-          echo "🔍 Trying Numbers API..."
-          FACT_JSON=$(curl -s --max-time 10 --retry 2 "http://numbersapi.com/${{ steps.date.outputs.date_slash }}/date?json")
-          FACT=$(echo "$FACT_JSON" | jq -r '.text // empty' 2>/dev/null)
+          # Install jq if not present (should be available in ubuntu-latest)
+          if ! command -v jq &> /dev/null; then
+            echo "📦 Installing jq..."
+            sudo apt-get update && sudo apt-get install -y jq
+          fi
           
-          # Validate the fact
-          if [ -n "$FACT" ] && [ "$FACT" != "null" ] && [[ ! "$FACT" =~ "does not exist" ]]; then
-            echo "✅ Successfully fetched from Numbers API"
+          # Try Numbers API with plain text first (more reliable)
+          echo "🔍 Trying Numbers API (plain text)..."
+          FACT=$(curl -s --max-time 10 --retry 2 "http://numbersapi.com/${{ steps.date.outputs.date_slash }}/date")
+          
+          # Validate plain text response
+          if [ -n "$FACT" ] && [ "$FACT" != "null" ] && [[ ! "$FACT" =~ "does not exist" ]] && [[ ! "$FACT" =~ "Not Found" ]]; then
+            echo "✅ Successfully fetched from Numbers API (plain text)"
           else
-            echo "❌ Numbers API failed, trying random date fact..."
-            FACT_JSON=$(curl -s --max-time 10 "http://numbersapi.com/random/date?json")
-            FACT=$(echo "$FACT_JSON" | jq -r '.text // empty' 2>/dev/null)
+            echo "🔄 Trying Numbers API (JSON)..."
+            FACT_JSON=$(curl -s --max-time 10 --retry 2 "http://numbersapi.com/${{ steps.date.outputs.date_slash }}/date?json")
+            FACT=$(echo "$FACT_JSON" | jq -r '.text' 2>/dev/null || echo "")
             
-            if [ -n "$FACT" ] && [ "$FACT" != "null" ]; then
-              echo "✅ Successfully fetched random date fact"
+            if [ -n "$FACT" ] && [ "$FACT" != "null" ] && [[ ! "$FACT" =~ "does not exist" ]]; then
+              echo "✅ Successfully fetched from Numbers API (JSON)"
             else
-              echo "❌ All APIs failed, using inspirational fallback"
-              FACT="On this day in history, remarkable things happened that shaped our world. Every day is a new opportunity for learning and growth! 🌟"
+              echo "🔄 Trying random date fact..."
+              RANDOM_FACT=$(curl -s --max-time 10 "http://numbersapi.com/random/date")
+              
+              if [ -n "$RANDOM_FACT" ] && [ "$RANDOM_FACT" != "null" ] && [[ ! "$RANDOM_FACT" =~ "does not exist" ]]; then
+                FACT="$RANDOM_FACT"
+                echo "✅ Successfully fetched random date fact"
+              else
+                echo "❌ All APIs failed, using inspirational fallback"
+                FACT="On ${{ steps.date.outputs.date_display }}, remember: every day brings new opportunities for learning and discovery! 💫"
+              fi
             fi
           fi
           
           # Clean and format the fact
           FACT=$(echo "$FACT" | tr -d '\r' | sed 's/^"//' | sed 's/"$//')
-          echo "📖 Fact: $FACT"
+          echo "📖 Final Fact: $FACT"
           
-          # Escape for sed and create outputs
+          # Escape for sed
           ESCAPED_FACT=$(printf '%s' "$FACT" | sed 's/[\/&]/\\&/g')
           echo "fact=$FACT" >> $GITHUB_OUTPUT
           echo "escaped_fact=$ESCAPED_FACT" >> $GITHUB_OUTPUT
@@ -96,45 +99,34 @@ jobs:
           # Create backup
           cp README.md README.md.backup
           
-          # Update the daily fact section to use code block format
+          # Update the daily fact section
           if sed -i "s|<!-- DAILY_FACT -->.*|<!-- DAILY_FACT -->\n\`\`\`plaintext\n📌 Daily Fact: ${{ steps.fact.outputs.fact }}\n\`\`\`|" README.md; then
             echo "✅ README updated successfully"
-            
-            # Show the change
-            echo "📊 Change made:"
-            git diff README.md || true
+            echo "📊 Change preview:"
+            git diff README.md | head -10 || true
           else
             echo "❌ Failed to update README, restoring backup"
             mv README.md.backup README.md
             exit 1
           fi
           
-          # Cleanup backup
           rm README.md.backup
 
-      # Step 7: Commit and push changes with merge strategy
+      # Step 7: Commit and push changes
       - name: 🚀 Commit and Push Changes
         run: |
           echo "📦 Staging changes..."
           git add README.md
           
           if git diff --staged --quiet; then
-            echo "✅ No changes to commit (fact might be identical)"
+            echo "✅ No changes to commit"
           else
             echo "💾 Committing changes..."
-            git commit -m "📚 Update daily fact for ${{ steps.date.outputs.iso_date }}
-            
-            • Date: ${{ steps.date.outputs.date_display }}
-            • Fact: ${{ steps.fact.outputs.fact }}"
+            git commit -m "📚 Update daily fact for ${{ steps.date.outputs.iso_date }}"
             
             echo "📤 Pushing to repository..."
-            
-            # Merge strategy: Pull remote changes and merge
-            echo "🔄 Pulling latest changes and merging..."
             git fetch origin
             git merge origin/main --no-edit -m "Merge remote changes"
-            
-            # Push the merged result
             git push origin main
             
             echo "🎉 Successfully updated daily fact!"
