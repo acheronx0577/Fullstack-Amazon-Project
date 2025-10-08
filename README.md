@@ -49,5 +49,8 @@ A complete Amazon-like shopping experience with real backend integration.
 - Clean Typography - Roboto font from Google Fonts
 - Professional Icons - Custom icon set for intuitive navigation
 
-## **📌 Daily Fact: **
-_(This section will be updated automatically)_
+## 📌 Today's Historical Fact
+<!-- DAILY_FACT -->
+**📌 Daily Fact:** On December 19, 1843, Charles Dickens' "A Christmas Carol" was first published, changing Christmas traditions forever.
+
+*✨ This fact updates automatically every day!*
