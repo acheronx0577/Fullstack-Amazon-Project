@@ -34,7 +34,14 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global pull.rebase false
 
-      # Step 3: Get current date information
+      # Step 3: Sync with remote before making changes
+      - name: 🔄 Sync with Remote
+        run: |
+          echo "🔄 Pulling latest changes from remote..."
+          git pull origin main
+          echo "✅ Successfully synced with remote"
+
+      # Step 4: Get current date information
       - name: 📅 Get Current Date
         id: date
         run: |
@@ -43,7 +50,7 @@ jobs:
           echo "iso_date=$(date -u +'%Y-%m-%d')" >> $GITHUB_OUTPUT
           echo "weekday=$(date +'%A')" >> $GITHUB_OUTPUT
 
-      # Step 4: Fetch daily fact from API
+      # Step 5: Fetch daily fact from API
       - name: 🌐 Fetch Daily Fact
         id: fact
         run: |
@@ -81,7 +88,7 @@ jobs:
           echo "fact=$FACT" >> $GITHUB_OUTPUT
           echo "escaped_fact=$ESCAPED_FACT" >> $GITHUB_OUTPUT
 
-      # Step 5: Update README file
+      # Step 6: Update README file
       - name: 📝 Update README
         run: |
           echo "🔄 Updating README.md..."
@@ -89,8 +96,8 @@ jobs:
           # Create backup
           cp README.md README.md.backup
           
-          # Update the daily fact section
-          if sed -i "s|<!-- DAILY_FACT -->.*|<!-- DAILY_FACT -->\n**📌 Daily Fact:** ${{ steps.fact.outputs.escaped_fact }}|" README.md; then
+          # Update the daily fact section to use code block format
+          if sed -i "s|<!-- DAILY_FACT -->.*|<!-- DAILY_FACT -->\n\`\`\`plaintext\n📌 Daily Fact: ${{ steps.fact.outputs.fact }}\n\`\`\`|" README.md; then
             echo "✅ README updated successfully"
             
             # Show the change
@@ -105,7 +112,7 @@ jobs:
           # Cleanup backup
           rm README.md.backup
 
-      # Step 6: Commit and push changes
+      # Step 7: Commit and push changes with merge strategy
       - name: 🚀 Commit and Push Changes
         run: |
           echo "📦 Staging changes..."
@@ -121,11 +128,19 @@ jobs:
             • Fact: ${{ steps.fact.outputs.fact }}"
             
             echo "📤 Pushing to repository..."
-            git push
+            
+            # Merge strategy: Pull remote changes and merge
+            echo "🔄 Pulling latest changes and merging..."
+            git fetch origin
+            git merge origin/main --no-edit -m "Merge remote changes"
+            
+            # Push the merged result
+            git push origin main
+            
             echo "🎉 Successfully updated daily fact!"
           fi
 
-      # Step 7: Summary
+      # Step 8: Summary
       - name: 📋 Summary
         if: always()
         run: |
