@@ -9,6 +9,9 @@ A complete Amazon-like shopping experience with real backend integration.
 
 ## 📌 Today's Historical Fact
 <!-- DAILY_FACT -->
+```plaintext
+📌 Daily Fact: Constantine I defeats Licinius, who loses his European territories.
+```
 
 *✨ This fact updates automatically every day!*
 
