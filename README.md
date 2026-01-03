@@ -1,5 +1,5 @@
 # 🛒 Amazon Clone - Fullstack E-commerce
-A complete Amazon-like shopping experience with real backend integration.
+A complete Amazon-like shopping experience with real backend integration!
 
 ## 🚀 Live Web
 **🌐 https://acheronx0577.github.io/Fullstack-Amazon-Project**
